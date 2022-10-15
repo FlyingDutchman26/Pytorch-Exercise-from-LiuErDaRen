@@ -1,18 +1,34 @@
 import torch
+import torch.nn  as  nn
+# torch 的核心是 nn.Module
 
 x_data = torch.tensor([[1.0], [2.0], [3.0]])
 y_data = torch.tensor([[0.0], [0.0], [1.0]])
 
 
-class LogisticRegressionModel(torch.nn.Module):
+class LogisticRegressionModel(nn.Module):
     def __init__(self) -> None:
         super(LogisticRegressionModel, self).__init__()
-        # torch.nn.Linear 这也是一个类，同样继承于 torch.nn.Module，可以自动生成计算图
-        self.Linear = torch.nn.Linear(1, 1)  # 实例化这个线性层 从 1维 到 1维 ，会生成对应参数（自动计算梯度）
+        self.Linear = nn.Linear(1,1)    # 先实例化需要的线性层,这样最后方便查看参数值
+        self.layers = nn.Sequential(    # 用Sequence类的容器封装好
+            self.Linear, # 不要忘记逗号，这是个实例化的函数，也是继承nn.Module类
+            nn.Sigmoid()
+        )
+      
 
     def forward(self, x):
-        y_pred = torch.sigmoid(self.Linear(x))     # 继承于torch.nn.Module的类都具有__call__()方法
+        y_pred = self.layers(x)
         return y_pred
+    
+# class LogisticRegressionModel(nn.Module):
+#     def __init__(self) -> None:
+#         super(LogisticRegressionModel, self).__init__()
+#         # torch.nn.Linear 这也是一个类，同样继承于 torch.nn.Module，可以自动生成计算图
+#         self.Linear = torch.nn.Linear(1, 1)  # 实例化这个线性层 从 1维 到 1维 ，会生成对应参数（自动计算梯度）
+
+#     def forward(self, x):
+#         y_pred = torch.Sigmoid(Self.Linear(x))     # 继承于torch.nn.Module的类都具有__call__()方法
+#         return y_pred
 
 
 model = LogisticRegressionModel()
@@ -40,10 +56,12 @@ for epoch in range(1,num_epochs+1):
     #打印状态
     print(f'[epoch]:{epoch} loss = {loss.item()}')
     
-    
+
+
 print('w = ', model.Linear.weight.item())
 print('b = ', model.Linear.bias.item())
- 
+
+
 x_test = torch.tensor([[4.0]])
 y_test = model(x_test)
 print('y_pred = ', y_test.data)
