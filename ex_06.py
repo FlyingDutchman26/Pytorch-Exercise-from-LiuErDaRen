@@ -54,7 +54,7 @@ for epoch in range(1,num_epochs+1):
     optimizer.step()
     
     #打印状态
-    print(f'[epoch]:{epoch} loss = {loss.item()}')
+    print(f'[epoch]:{epoch} loss = {loss.item()}')  # 此处写loss也可以，会自动调用_str()方法把tensor转化为可打印数据
     
 
 
