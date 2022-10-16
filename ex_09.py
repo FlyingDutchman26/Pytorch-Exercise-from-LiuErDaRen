@@ -114,10 +114,11 @@ def test():
     accuracy_list.append(accuracy)
     print(f'Current accuracy on the whole set is {accuracy}')
 
-# start training!
+# start training now!
 
 
 num_epochs = 10
+
 
 for epoch in range(1, num_epochs+1):
     train(epoch)
