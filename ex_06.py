@@ -2,6 +2,7 @@ import torch
 import torch.nn  as  nn
 # torch 的核心是 nn.Module
 
+# 本任务实现一个 Logistic 回归
 x_data = torch.tensor([[1.0], [2.0], [3.0]])
 y_data = torch.tensor([[0.0], [0.0], [1.0]])
 
