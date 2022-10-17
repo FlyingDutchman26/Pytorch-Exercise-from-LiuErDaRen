@@ -1,7 +1,6 @@
-# 利用MNIST 手写数字识别数据集 实现一个完善的 多分类任务的 全连接神经网络
+# 修改任务9 在MNIST 数据集上 利用 卷积神经网络 完成多分类任务
 # 不设置 validation_set ，直接在整个集合上测试分类准确度
-# 我的实验结果准确率达到了了97%，与老师的实验结果相符合
-
+# 我的测试准确率达到了98%以上，比上一个全连接网络有所提高，与老师的结果相符
 import torch
 import torch.nn as nn
 import matplotlib.pyplot as plt
@@ -23,6 +22,10 @@ def setup_seed(seed):
 
 setup_seed(1012)
 
+# 设置GPU加速
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"The current computing device is {device.type} ")
+
 # prepare dataset
 
 batch_size = 64
@@ -30,6 +33,7 @@ transform = transforms.Compose(
     [transforms.ToTensor(),
      transforms.Normalize((0.1307,), (0.3081,))])
 # 处理图像数据的一个转换类 将pillow类转化为tensor, 并将值归一化： 0.1307 和 0.3081 为该数据集的均值和标准差
+# 每一个数据为[28,28]的tensor
 
 train_dataset = datasets.MNIST(
     root='./dataset/mnist/', train=True, download=True, transform=transform)
@@ -38,38 +42,37 @@ test_dataset = datasets.MNIST(
     root='./dataset/mnist/', train=False, download=True, transform=transform)
 test_loader = DataLoader(test_dataset, shuffle=False,
                          batch_size=len(test_dataset))  # 测试肯定是
-# 此时dataset中的每一个元素仍然是一个28*28的矩阵，若使用全连接神经网络线性层，需要将其转化为[1,28*28(784)]的形状
-
 
 # design model
+
 
 class Net(nn.Module):
     def __init__(self) -> None:
         super(Net, self).__init__()
-        self.l1 = nn.Linear(784, 512)
-        self.l2 = nn.Linear(512, 256)
-        self.l3 = nn.Linear(256, 128)
-        self.l4 = nn.Linear(128, 64)
-        self.l5 = nn.Linear(64, 10)
+        self.conv1 = nn.Conv2d(1, 10, kernel_size=5)
+        self.conv2 = nn.Conv2d(10, 20, kernel_size=5)
+        self.pooling = nn.MaxPool2d(2)
+        self.linear = nn.Linear(320, 10)
         self.layers = nn.Sequential(
-            self.l1,
+            self.conv1,
+            self.pooling,
             nn.ReLU(),
-            self.l2,
+            self.conv2,
+            self.pooling,
             nn.ReLU(),
-            self.l3,
-            nn.ReLU(),
-            self.l4,
-            nn.ReLU(),
-            self.l5
-            # 最后一层softmax之后会自动接在损失函数之上
         )
 
     def forward(self, x):
-        x = x.view(-1, 784)  # 把minibatch reshape to [N, 784], 784是每个图像的特征维度
-        return self.layers(x)
+        batch_size = x.shape[0]
+        x = self.layers(x)
+        # 在转换到全连接层之前需要进行flatten操作,变为[batch_size,320]
+        x = x.view(batch_size, -1)
+        x = self.linear(x)
+        return x
 
 
 model = Net()
+model.to(device)
 
 # construct loss and optimiter
 
@@ -88,6 +91,8 @@ def train(epoch):
     epoch_loss = []  # 记录该轮epoch上每个batch的loss
     for batch_idx, batch_data in enumerate(train_loader, 1):
         X, y_label = batch_data
+        X, y_label = X.to(device), y_label.to(device)
+        # print("debug here: X shape:", X.shape)
         y_pred = model(X)
         loss = criterion(y_pred, y_label)
 
@@ -108,6 +113,7 @@ def test():
     with torch.no_grad():
         for batch_data in test_loader:
             X, y = batch_data
+            X, y = X.to(device) ,y.to(device)
             y_pred = model(X)
             y_pred = torch.argmax(y_pred, dim=1)
             correct_num += torch.sum(y_pred == y).item()
