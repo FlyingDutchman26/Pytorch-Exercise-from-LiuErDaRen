@@ -98,6 +98,7 @@ def train(epoch):
         optimizer.step()
 
     average_loss = sum(epoch_loss)/len(epoch_loss)
+    loss_list.append(average_loss)
     print(f'[epoch]:{epoch},  [average_loss]: {average_loss}')
 
 
@@ -113,7 +114,7 @@ def test():
             correct_num += torch.sum(y_pred == y).item()
     accuracy = correct_num/num
     accuracy_list.append(accuracy)
-    print(f'Current accuracy on the whole set is {accuracy}')
+    print(f'Current accuracy on the test set is {accuracy}')
 
 # start training now!
 
