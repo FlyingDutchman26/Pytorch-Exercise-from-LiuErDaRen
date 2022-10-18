@@ -1,5 +1,5 @@
 # 利用MNIST 手写数字识别数据集 实现一个完善的 多分类任务的 全连接神经网络
-# 不设置 validation_set ，直接在整个集合上测试分类准确度
+# 不需要划分 validation_set ，直接有一个test_dataset 可以测试准确率
 # 我的实验结果准确率达到了了97%，与老师的实验结果相符合
 
 import torch

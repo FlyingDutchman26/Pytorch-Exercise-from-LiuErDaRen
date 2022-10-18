@@ -1,5 +1,5 @@
 # 修改任务9 在MNIST 数据集上 利用 卷积神经网络 完成多分类任务
-# 不设置 validation_set ，直接在整个集合上测试分类准确度
+# 不需要划分 validation_set ，直接有一个test_dataset 可以测试准确率
 # 我的测试准确率达到了98%以上，比上一个全连接网络有所提高，与老师的结果相符
 import torch
 import torch.nn as nn
@@ -113,7 +113,7 @@ def test():
     with torch.no_grad():
         for batch_data in test_loader:
             X, y = batch_data
-            X, y = X.to(device) ,y.to(device)
+            X, y = X.to(device), y.to(device)
             y_pred = model(X)
             y_pred = torch.argmax(y_pred, dim=1)
             correct_num += torch.sum(y_pred == y).item()
